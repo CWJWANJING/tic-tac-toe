@@ -1,4 +1,5 @@
 import random
+import pdb
 
  #  O |   | X
  # -----------
@@ -56,31 +57,62 @@ def firstMover():
     rand = random.randint(0,1)
     if rand == 0:
         print("X moves first.")
+        return "X"
     else:
         print("O moves first.")
+        return "O"
+
+
+def drawTheMove(x,y,dict,move):
+    if x == 1:
+        if y == 1:
+            dict[0][1] = move
+        elif y == 2:
+            dict[0][5] = move
+        elif y == 3:
+            dict[0][9] = move
+    elif x == 2:
+        if y == 1:
+            dict[2][1] = move
+        elif y == 2:
+            dict[2][5] = move
+        elif y == 3:
+            dict[2][9] = move
+    elif x == 3:
+        if y == 1:
+            dict[4][1] = move
+        elif y == 2:
+            dict[4][5] = move
+        elif y == 3:
+            dict[4][9] = move
+    else:
+        print("Please enter a valid coordinates.")
+    return dict
+
+
+def switchTurns(move):
+    if move == "X":
+        return "O"
+    else:
+        return "X"
 
 
 if __name__ == "__main__":
+    # draw initial stage out first
+    dict = makeDict()
+    printDict(dict)
+    print("\n→ 1  2  3")
+    print("↓ 1  2  3")
+    print("Please decide who's X or O")
+    print("Then enter the coorninates of the blanks of this form: 11")
+    # decides who moves first
+    move = firstMover()
     while True:
-        # draw initial stage out first
-        dict = makeDict()
-        printDict(dict)
-        print("\n→ 1  2  3")
-        print("↓ 1  2  3")
-        print("Please decide who's X or O")
-        print("Then enter the coorninates of the blanks of this form: [1,1]")
-        # decides who moves first
-        firstMover()
-
         # get the input, input should be in coordinates form:
         # labeling start from [1,1]
         inp = input()
-        x = inp[0]
-        y = inp[1]
-        if x == 1:
-            if y == 1:
-                dict[0][2] = "O"
-            elif y == 2:
-                dict[0][6] = "O"
-        else:
-            None
+        x = int(inp[0])
+        y = int(inp[1])
+        dict = drawTheMove(x,y,dict,move)
+        printDict(dict)
+        move = switchTurns(move)
