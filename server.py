@@ -19,6 +19,7 @@ s.listen(2)
 print("Server started, waiting for connections")
 
 def threaded_client(conn):
+    conn.send(str.encode("Connected"))
     reply = ""
     while True:
         try:
@@ -35,6 +36,8 @@ def threaded_client(conn):
             conn.sendall(str.encode(reply))
         except:
             break
+    print("Lost connection")
+    conn.close()
 
 
 
