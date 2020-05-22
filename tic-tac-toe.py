@@ -1,5 +1,7 @@
 import random
 import pdb
+import sys
+import socket
 
  #  O |   | X
  # -----------
@@ -199,13 +201,9 @@ def checkdraw(dict):
 def prep():
     dict = makeDict()
     printDict(dict)
-    print("Please decide who's X or O")
-    print("Then enter the coorninates of the blanks of this form: 11")
-    # decides who moves first
-    move = firstMover()
     # record the actioned moves
     moveds = []
-    return dict, move, moveds
+    return dict, moveds
 
 
 def game(inp, dict, move, moveds):
@@ -244,19 +242,95 @@ def checkinp(inp):
         inval = True
     return inval
 
+def get_ip():
+    ip = socket.gethostbyname(socket.gethostname())
+    if ip != "127.0.0.1" and ip != "::1":
+        return ip
+    print("Couldn't auto-detect IP, please enter (type ifconfig in terminal)")
+    ip = input("> ").strip()
+    return ip
 
 if __name__ == "__main__":
-    # draw initial stage out first
-    dict, move, moveds = prep()
-    while True:
-        # get the input, input should be in coordinates form:
-        # labeling start from [1,1]
-        inp = input()
-        inval = checkinp(inp)
-        if inval == False:
-            win, draw, move, moveds = game(inp, dict, move, moveds)
+    port = 5545
+    dict, moveds = prep()
+    print("X moves first")
+    move = None
+    whoami = None
+    conn = None
+    try:
+        # check if Server
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # if Server
+        if sys.argv[1] == "server":
+        #   print IP
+            ip = "0.0.0.0"
+            try:
+                s.bind((ip, port))
+            except socket.error as e:
+                print(str(e))
+            s.listen(1)
+            print("Server started, waiting for connections")
+        #   set up accept conn
+            conn, addr = s.accept()
+            conn.setblocking(True)
+            print("Connected to:", addr)
+            move = "X"
+            whoami = "X"
+        # else
+        else:
+        #   ask for IP
+            ip = sys.argv[1]
+        #   connect
+            s.setblocking(True)
+            s.connect((ip,port))
+            move = "X"
+            whoami = "O"
+            conn = s
+        # loop
+        while True:
+        #   if our_turn
+            if move == whoami:
+        #      get input
+                inp = input()
+                inval = checkinp(inp)
+                if inval == False:
+                    win, draw, move, moveds = game(inp, dict, move, moveds)
+        #      send to server
+                else:
+                    continue
+                conn.send(str.encode(inp))
+        #   else
+            else:
+        #      Receive
+                print("Waiting for the opponent")
+                inp = conn.recv(2048).decode()
+                win, draw, move, moveds = game(inp, dict, move, moveds)
+        #   plot_move
+
+        #   check win
             if win:
                 break
             # if in the end no win then draw
             if draw:
                 break
+        #   update our_turn (our_turn = !our_turn)
+    except Exception as e:
+        print(e)
+    finally:
+        s.close()
+
+
+
+    # # draw initial stage out first
+    # while True:
+    #     # get the input, input should be in coordinates form:
+    #     # labeling start from 11
+    #     inp = input()
+    #     inval = checkinp(inp)
+    #     if inval == False:
+    #         win, draw, move, moveds = game(inp, dict, move, moveds)
+    #         if win:
+    #             break
+    #         # if in the end no win then draw
+    #         if draw:
+    #             break
