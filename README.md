@@ -28,6 +28,13 @@ The client side is the **O**, and needs to run command:
 python tic-tac-toe.py ***enter this machine's ip address***
 ```
 
+You can find out your ip address by entering this in your terminal:
+
+```python
+ipconfig
+```
+
+
 Here is a video how it is played:
 
 ![Demo](tttdemo_small.mp4)
